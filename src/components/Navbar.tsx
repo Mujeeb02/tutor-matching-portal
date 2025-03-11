@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Menu, X } from 'lucide-react';
 
@@ -26,11 +27,11 @@ const Navbar = () => {
     >
       <div className="container mx-auto px-4 md:px-6 flex items-center justify-between">
         {/* Logo */}
-        <a href="/" className="flex items-center">
+        <Link to="/" className="flex items-center">
           <span className="text-xl md:text-2xl font-bold text-primary animate-pulse-slow">
             TutorMatch
           </span>
-        </a>
+        </Link>
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-8">
@@ -43,18 +44,18 @@ const Navbar = () => {
           <a href="#tutors" className="text-foreground hover:text-primary transition-colors">
             Find Tutors
           </a>
-          <a href="#pricing" className="text-foreground hover:text-primary transition-colors">
+          <Link to="/pricing" className="text-foreground hover:text-primary transition-colors">
             Pricing
-          </a>
+          </Link>
         </nav>
 
         {/* CTA Buttons */}
         <div className="hidden md:flex items-center space-x-4">
-          <Button variant="outline" className="rounded-full border-primary text-primary hover:text-primary-foreground hover:bg-primary">
-            Log In
+          <Button variant="outline" className="rounded-full border-primary text-primary hover:text-primary-foreground hover:bg-primary" asChild>
+            <Link to="/login">Log In</Link>
           </Button>
-          <Button className="rounded-full bg-primary hover:bg-primary/90 text-white">
-            Sign Up
+          <Button className="rounded-full bg-primary hover:bg-primary/90 text-white" asChild>
+            <Link to="/signup">Sign Up</Link>
           </Button>
         </div>
 
@@ -79,16 +80,16 @@ const Navbar = () => {
               <a href="#tutors" className="text-foreground hover:text-primary transition-colors px-4 py-2">
                 Find Tutors
               </a>
-              <a href="#pricing" className="text-foreground hover:text-primary transition-colors px-4 py-2">
+              <Link to="/pricing" className="text-foreground hover:text-primary transition-colors px-4 py-2">
                 Pricing
-              </a>
+              </Link>
               <hr className="border-border" />
               <div className="flex flex-col space-y-3 pt-2">
-                <Button variant="outline" className="rounded-full border-primary text-primary hover:text-primary-foreground hover:bg-primary w-full">
-                  Log In
+                <Button variant="outline" className="rounded-full border-primary text-primary hover:text-primary-foreground hover:bg-primary w-full" asChild>
+                  <Link to="/login">Log In</Link>
                 </Button>
-                <Button className="rounded-full bg-primary hover:bg-primary/90 text-white w-full">
-                  Sign Up
+                <Button className="rounded-full bg-primary hover:bg-primary/90 text-white w-full" asChild>
+                  <Link to="/signup">Sign Up</Link>
                 </Button>
               </div>
             </nav>
