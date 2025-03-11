@@ -1,10 +1,11 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Mail, Lock, User, ArrowRight, Facebook, Twitter, Chrome } from "lucide-react";
+import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -13,11 +14,22 @@ const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [accountType, setAccountType] = useState<"student" | "tutor">("student");
+  const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle signup logic here
     console.log("Signup attempt with:", { name, email, password, accountType });
+    
+    // Show success notification
+    toast.success("Account created successfully!");
+    
+    // Redirect based on account type
+    if (accountType === "student") {
+      navigate("/student-dashboard");
+    } else {
+      navigate("/tutor-dashboard");
+    }
   };
 
   return (

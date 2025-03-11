@@ -1,21 +1,34 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Mail, Lock, ArrowRight, Facebook, Twitter, Chrome } from "lucide-react";
+import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [accountType, setAccountType] = useState<"student" | "tutor">("student");
+  const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle login logic here
-    console.log("Login attempt with:", { email, password });
+    console.log("Login attempt with:", { email, password, accountType });
+    
+    // Show success notification
+    toast.success("Login successful!");
+    
+    // Redirect based on account type
+    if (accountType === "student") {
+      navigate("/student-dashboard");
+    } else {
+      navigate("/tutor-dashboard");
+    }
   };
 
   return (
@@ -34,6 +47,29 @@ const Login = () => {
             <div className="text-center mb-8">
               <h1 className="text-3xl font-bold mb-2">Welcome Back</h1>
               <p className="text-muted-foreground">Sign in to access your account</p>
+            </div>
+            
+            <div className="flex rounded-full bg-secondary p-1 mb-6">
+              <button
+                className={`flex-1 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  accountType === "student" 
+                    ? "bg-primary text-white" 
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+                onClick={() => setAccountType("student")}
+              >
+                I'm a Student
+              </button>
+              <button
+                className={`flex-1 px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  accountType === "tutor" 
+                    ? "bg-primary text-white" 
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+                onClick={() => setAccountType("tutor")}
+              >
+                I'm a Tutor
+              </button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
