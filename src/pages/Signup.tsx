@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Mail, Lock, User, ArrowRight, Facebook, Twitter, Google } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, Facebook, Twitter, Chrome } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -125,7 +125,7 @@ const Signup = () => {
 
             <div className="grid grid-cols-3 gap-3">
               <Button variant="outline" className="rounded-full">
-                <Google size={18} />
+                <Chrome size={18} />
               </Button>
               <Button variant="outline" className="rounded-full">
                 <Facebook size={18} />
