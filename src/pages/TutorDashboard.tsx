@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,8 +14,7 @@ import {
   ChevronRight, 
   DollarSign, 
   CheckCircle, 
-  XCircle,
-  Menu
+  XCircle
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -26,6 +25,7 @@ import { toast } from "sonner";
 const TutorDashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isAvailable, setIsAvailable] = useState(true);
+  const location = useLocation();
 
   // Mock data for upcoming sessions
   const upcomingSessions = [
@@ -92,35 +92,14 @@ const TutorDashboard = () => {
     console.log("Declined session request:", id);
   };
 
-  return (
-    <div className="min-h-screen flex bg-background">
-      <TutorSidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
-      
-      <div 
-        className={cn(
-          "flex-1 transition-all duration-300",
-          isSidebarOpen ? "ml-64" : "ml-20"
-        )}
-      >
-        <main className="py-8 px-6 max-w-7xl mx-auto w-full">
-          {/* Welcome Section */}
-          <div className="mb-8 flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold mb-2">Welcome back, Prof. Michael!</h1>
-              <p className="text-muted-foreground">Manage your tutoring sessions, schedule, and earnings.</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <Label htmlFor="availability" className={cn(isAvailable ? "text-green-500" : "text-muted-foreground")}>
-                {isAvailable ? "Available for Sessions" : "Unavailable"}
-              </Label>
-              <Switch 
-                id="availability" 
-                checked={isAvailable} 
-                onCheckedChange={handleAvailabilityChange}
-              />
-            </div>
-          </div>
-          
+  // Render different content based on the current route
+  const renderContent = () => {
+    const path = location.pathname;
+    
+    // Default dashboard view
+    if (path === "/tutor-dashboard") {
+      return (
+        <div className="space-y-8">
           {/* Stats Overview */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <Card>
@@ -349,6 +328,53 @@ const TutorDashboard = () => {
               </Card>
             </div>
           </div>
+        </div>
+      );
+    }
+    
+    // Placeholder content for other routes
+    return (
+      <div className="space-y-4">
+        <h1 className="text-3xl font-bold">{path.split('/').pop()?.replace('-', ' ').replace(/^\w/, c => c.toUpperCase())}</h1>
+        <Card>
+          <CardContent className="pt-6">
+            <p>This is the {path.split('/').pop()?.replace('-', ' ')} page content. This section is currently under development.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  };
+
+  return (
+    <div className="min-h-screen flex bg-background">
+      <TutorSidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+      
+      <div 
+        className={cn(
+          "flex-1 transition-all duration-300",
+          isSidebarOpen ? "ml-64" : "ml-20"
+        )}
+      >
+        <main className="py-8 px-6 max-w-7xl mx-auto w-full">
+          {/* Welcome Section */}
+          <div className="mb-8 flex justify-between items-center">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">Welcome back, Prof. Michael!</h1>
+              <p className="text-muted-foreground">Manage your tutoring sessions, schedule, and earnings.</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Label htmlFor="availability" className={cn(isAvailable ? "text-green-500" : "text-muted-foreground")}>
+                {isAvailable ? "Available for Sessions" : "Unavailable"}
+              </Label>
+              <Switch 
+                id="availability" 
+                checked={isAvailable} 
+                onCheckedChange={handleAvailabilityChange}
+              />
+            </div>
+          </div>
+          
+          {renderContent()}
         </main>
       </div>
     </div>

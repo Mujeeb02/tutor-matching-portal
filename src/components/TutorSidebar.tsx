@@ -24,9 +24,10 @@ interface SidebarItemProps {
   label: string;
   href: string;
   active?: boolean;
+  badge?: number;
 }
 
-const SidebarItem = ({ icon: Icon, label, href, active }: SidebarItemProps) => {
+const SidebarItem = ({ icon: Icon, label, href, active, badge }: SidebarItemProps) => {
   return (
     <Link to={href}>
       <Button
@@ -37,7 +38,12 @@ const SidebarItem = ({ icon: Icon, label, href, active }: SidebarItemProps) => {
         )}
       >
         <Icon size={20} />
-        <span>{label}</span>
+        <span className="flex-grow text-left">{label}</span>
+        {badge !== undefined && (
+          <span className="inline-flex items-center justify-center w-5 h-5 text-xs font-medium rounded-full bg-primary/20 text-primary">
+            {badge}
+          </span>
+        )}
       </Button>
     </Link>
   );
@@ -52,6 +58,10 @@ const TutorSidebar = ({ isOpen, toggleSidebar }: TutorSidebarProps) => {
   const location = useLocation();
   const tutorName = "Michael Smith";
   const tutorTitle = "Math & Physics Tutor";
+  
+  // Mock notification counts
+  const messageCount = 3;
+  const materialCount = 2;
 
   return (
     <div
@@ -78,7 +88,7 @@ const TutorSidebar = ({ isOpen, toggleSidebar }: TutorSidebarProps) => {
 
       <Separator />
 
-      <div className="px-3 py-4 overflow-y-auto">
+      <div className="px-3 py-4 overflow-y-auto h-[calc(100vh-64px)]">
         <nav className="space-y-1.5">
           <SidebarItem
             icon={Home}
@@ -103,12 +113,14 @@ const TutorSidebar = ({ isOpen, toggleSidebar }: TutorSidebarProps) => {
             label="Messages"
             href="/tutor-dashboard/messages"
             active={location.pathname === "/tutor-dashboard/messages"}
+            badge={messageCount}
           />
           <SidebarItem
             icon={FileText}
             label="Materials"
             href="/tutor-dashboard/materials"
             active={location.pathname === "/tutor-dashboard/materials"}
+            badge={materialCount}
           />
           <SidebarItem
             icon={DollarSign}
