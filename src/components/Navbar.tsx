@@ -41,12 +41,12 @@ const Navbar = () => {
           <a href="#how-it-works" className="text-foreground hover:text-primary transition-colors">
             How It Works
           </a>
+          <a href="#pricing" className="text-foreground hover:text-primary transition-colors">
+            Pricing
+          </a>
           <a href="#tutors" className="text-foreground hover:text-primary transition-colors">
             Find Tutors
           </a>
-          <Link to="/pricing" className="text-foreground hover:text-primary transition-colors">
-            Pricing
-          </Link>
         </nav>
 
         {/* CTA Buttons */}
@@ -77,12 +77,12 @@ const Navbar = () => {
               <a href="#how-it-works" className="text-foreground hover:text-primary transition-colors px-4 py-2">
                 How It Works
               </a>
+              <a href="#pricing" className="text-foreground hover:text-primary transition-colors px-4 py-2">
+                Pricing
+              </a>
               <a href="#tutors" className="text-foreground hover:text-primary transition-colors px-4 py-2">
                 Find Tutors
               </a>
-              <Link to="/pricing" className="text-foreground hover:text-primary transition-colors px-4 py-2">
-                Pricing
-              </Link>
               <hr className="border-border" />
               <div className="flex flex-col space-y-3 pt-2">
                 <Button variant="outline" className="rounded-full border-primary text-primary hover:text-primary-foreground hover:bg-primary w-full" asChild>

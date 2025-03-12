@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
@@ -7,6 +6,7 @@ import SearchFilters from "@/components/SearchFilters";
 import TutorCard from "@/components/TutorCard";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
+import PricingCard from "@/components/PricingCard";
 import {
   Search,
   MapPin,
@@ -222,6 +222,81 @@ const Index = () => {
           <div className="text-center mt-12">
             <Button variant="outline" size="lg" className="rounded-full animate-fade-up" style={{ animationDelay: "0.5s" }}>
               Learn More
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section id="pricing" className="py-20 relative overflow-hidden">
+        <div className="absolute inset-0 -z-10">
+          <div className="absolute -top-96 -right-96 w-[600px] h-[600px] bg-purple-700/5 rounded-full filter blur-3xl"></div>
+          <div className="absolute -bottom-96 -left-96 w-[600px] h-[600px] bg-primary/5 rounded-full filter blur-3xl"></div>
+        </div>
+
+        <div className="container mx-auto px-4 md:px-6">
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 animate-fade-up">
+              Choose Your <span className="text-gradient">Plan</span>
+            </h2>
+            <p className="text-muted-foreground animate-fade-up" style={{ animationDelay: "0.1s" }}>
+              Select the perfect plan that suits your learning needs and budget.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <PricingCard 
+              title="Basic"
+              price="Free"
+              description="For students just getting started with tutoring needs."
+              features={[
+                "Browse tutor profiles",
+                "Search by location",
+                "Basic filtering options",
+                "Read tutor reviews",
+                "Limited messaging"
+              ]}
+              buttonText="Get Started"
+              delay={0.1}
+            />
+            
+            <PricingCard 
+              title="Premium"
+              price="$19.99"
+              description="Our most popular plan, perfect for regular students."
+              features={[
+                "All Basic features",
+                "Advanced filtering",
+                "Priority booking",
+                "Unlimited messaging",
+                "Video consultations",
+                "Save favorite tutors"
+              ]}
+              buttonText="Start Premium"
+              isPopular={true}
+              delay={0.2}
+            />
+            
+            <PricingCard 
+              title="Family"
+              price="$29.99"
+              description="Perfect for families with multiple students."
+              features={[
+                "All Premium features",
+                "Up to 5 student profiles",
+                "Family discount on bookings",
+                "Weekly progress reports",
+                "Dedicated support",
+                "Group session options"
+              ]}
+              buttonText="Choose Family"
+              delay={0.3}
+            />
+          </div>
+
+          <div className="text-center mt-12">
+            <Button asChild size="lg" className="rounded-full animate-fade-up" style={{ animationDelay: "0.7s" }}>
+              <a href="/pricing">View All Plans</a>
             </Button>
           </div>
         </div>
