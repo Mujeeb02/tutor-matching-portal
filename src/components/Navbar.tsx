@@ -35,18 +35,18 @@ const Navbar = () => {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-8">
-          <a href="#features" className="text-foreground hover:text-primary transition-colors">
+          <Link to="/features" className="text-foreground hover:text-primary transition-colors">
             Features
-          </a>
-          <a href="#how-it-works" className="text-foreground hover:text-primary transition-colors">
+          </Link>
+          <a href="/#how-it-works" className="text-foreground hover:text-primary transition-colors">
             How It Works
           </a>
-          <a href="#pricing" className="text-foreground hover:text-primary transition-colors">
+          <Link to="/plans" className="text-foreground hover:text-primary transition-colors">
             Pricing
-          </a>
-          <a href="#tutors" className="text-foreground hover:text-primary transition-colors">
+          </Link>
+          <Link to="/tutors" className="text-foreground hover:text-primary transition-colors">
             Find Tutors
-          </a>
+          </Link>
         </nav>
 
         {/* CTA Buttons */}
@@ -71,18 +71,18 @@ const Navbar = () => {
         {mobileMenuOpen && (
           <div className="md:hidden absolute top-full left-0 right-0 bg-background/95 backdrop-blur-lg p-4 shadow-lg animate-fade-down">
             <nav className="flex flex-col space-y-4 py-4">
-              <a href="#features" className="text-foreground hover:text-primary transition-colors px-4 py-2">
+              <Link to="/features" className="text-foreground hover:text-primary transition-colors px-4 py-2">
                 Features
-              </a>
-              <a href="#how-it-works" className="text-foreground hover:text-primary transition-colors px-4 py-2">
+              </Link>
+              <a href="/#how-it-works" className="text-foreground hover:text-primary transition-colors px-4 py-2">
                 How It Works
               </a>
-              <a href="#pricing" className="text-foreground hover:text-primary transition-colors px-4 py-2">
+              <Link to="/plans" className="text-foreground hover:text-primary transition-colors px-4 py-2">
                 Pricing
-              </a>
-              <a href="#tutors" className="text-foreground hover:text-primary transition-colors px-4 py-2">
+              </Link>
+              <Link to="/tutors" className="text-foreground hover:text-primary transition-colors px-4 py-2">
                 Find Tutors
-              </a>
+              </Link>
               <hr className="border-border" />
               <div className="flex flex-col space-y-3 pt-2">
                 <Button variant="outline" className="rounded-full border-primary text-primary hover:text-primary-foreground hover:bg-primary w-full" asChild>

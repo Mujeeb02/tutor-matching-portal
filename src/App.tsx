@@ -11,6 +11,9 @@ import Signup from "./pages/Signup";
 import StudentDashboard from "./pages/StudentDashboard";
 import TutorDashboard from "./pages/TutorDashboard";
 import NotFound from "./pages/NotFound";
+import Features from "./pages/Features";
+import Plans from "./pages/Plans";
+import Tutors from "./pages/Tutors";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +28,9 @@ const App = () => (
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/features" element={<Features />} />
+          <Route path="/plans" element={<Plans />} />
+          <Route path="/tutors" element={<Tutors />} />
           <Route path="/student-dashboard" element={<StudentDashboard />} />
           <Route path="/student-dashboard/find-tutors" element={<StudentDashboard />} />
           <Route path="/student-dashboard/my-tutors" element={<StudentDashboard />} />
