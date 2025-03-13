@@ -1,290 +1,433 @@
 
-import React, { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import {
-  Search,
-  BookOpen,
-  Calendar,
-  Clock,
-  Filter,
-  Star,
-  MessageSquare,
-  ChevronDown,
-  ChevronUp,
-  Users,
-} from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Calendar, Search, Users, Star, MessageSquare, Filter } from "lucide-react";
+import TutorSidebar from "@/components/TutorSidebar";
 import { toast } from "sonner";
 
+// Student data interface
+interface Student {
+  id: number;
+  name: string;
+  avatar: string;
+  subject: string;
+  level: string;
+  lastSession: string;
+  nextSession?: string;
+  sessions: number;
+  rating: number;
+  status: "active" | "inactive";
+}
+
 const StudentsPage = () => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
-  const [activeFilter, setActiveFilter] = useState("all");
 
   // Mock student data
-  const students = [
+  const students: Student[] = [
     {
       id: 1,
       name: "Alex Johnson",
-      email: "alex.johnson@example.com",
-      joinDate: "2023-06-15",
-      lastSession: "2023-11-02",
+      avatar: "https://i.pravatar.cc/150?img=33",
       subject: "Mathematics",
-      level: "Advanced",
-      sessionsCompleted: 12,
-      upcomingSessions: 2,
-      status: "active",
-      avatarUrl: "https://i.pravatar.cc/150?img=33",
+      level: "High School",
+      lastSession: "Today",
+      nextSession: "May 15, 2:00 PM",
+      sessions: 12,
+      rating: 4.8,
+      status: "active"
     },
     {
       id: 2,
-      name: "Emma Wilson",
-      email: "emma.wilson@example.com",
-      joinDate: "2023-07-23",
-      lastSession: "2023-10-29",
-      subject: "Physics",
-      level: "Intermediate",
-      sessionsCompleted: 8,
-      upcomingSessions: 1,
-      status: "active",
-      avatarUrl: "https://i.pravatar.cc/150?img=23",
+      name: "Emma Davis",
+      avatar: "https://i.pravatar.cc/150?img=23",
+      subject: "Chemistry",
+      level: "College",
+      lastSession: "Yesterday",
+      nextSession: "May 18, 3:30 PM",
+      sessions: 8,
+      rating: 4.5,
+      status: "active"
     },
     {
       id: 3,
-      name: "James Brown",
-      email: "james.brown@example.com",
-      joinDate: "2023-09-05",
-      lastSession: "2023-10-27",
-      subject: "Chemistry",
-      level: "Beginner",
-      sessionsCompleted: 5,
-      upcomingSessions: 0,
-      status: "inactive",
-      avatarUrl: "https://i.pravatar.cc/150?img=67",
+      name: "Sam Wilson",
+      avatar: "https://i.pravatar.cc/150?img=12",
+      subject: "Physics",
+      level: "High School",
+      lastSession: "3 days ago",
+      nextSession: "May 20, 4:00 PM",
+      sessions: 15,
+      rating: 5.0,
+      status: "active"
     },
     {
       id: 4,
-      name: "Lily Chen",
-      email: "lily.chen@example.com",
-      joinDate: "2023-08-12",
-      lastSession: "2023-11-01",
+      name: "Ryan Thompson",
+      avatar: "https://i.pravatar.cc/150?img=53",
       subject: "Biology",
-      level: "Intermediate",
-      sessionsCompleted: 7,
-      upcomingSessions: 1,
-      status: "active",
-      avatarUrl: "https://i.pravatar.cc/150?img=47",
+      level: "Middle School",
+      lastSession: "Last week",
+      sessions: 6,
+      rating: 4.2,
+      status: "inactive"
     },
     {
       id: 5,
-      name: "Ethan Davis",
-      email: "ethan.davis@example.com",
-      joinDate: "2023-10-03",
-      lastSession: null,
-      subject: "Computer Science",
-      level: "Beginner",
-      sessionsCompleted: 1,
-      upcomingSessions: 1,
-      status: "new",
-      avatarUrl: "https://i.pravatar.cc/150?img=53",
-    },
+      name: "Olivia Martin",
+      avatar: "https://i.pravatar.cc/150?img=25",
+      subject: "Literature",
+      level: "College",
+      lastSession: "2 weeks ago",
+      sessions: 4,
+      rating: 4.7,
+      status: "inactive"
+    }
   ];
 
-  // Filter students based on search query and active filter
-  const filteredStudents = students
-    .filter((student) => {
-      const matchesSearch =
-        student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        student.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        student.subject.toLowerCase().includes(searchQuery.toLowerCase());
-
-      if (activeFilter === "all") return matchesSearch;
-      if (activeFilter === "active") return matchesSearch && student.status === "active";
-      if (activeFilter === "inactive") return matchesSearch && student.status === "inactive";
-      if (activeFilter === "new") return matchesSearch && student.status === "new";
-      return matchesSearch;
-    })
-    .sort((a, b) => {
-      if (sortDirection === "asc") {
-        return a.name.localeCompare(b.name);
-      } else {
-        return b.name.localeCompare(a.name);
-      }
-    });
-
-  const handleSortToggle = () => {
-    setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const handleMessageStudent = (id: number, name: string) => {
-    toast.success(`Opening chat with ${name}`);
-    console.log("Messaging student:", id);
+  const handleContactStudent = (studentName: string) => {
+    toast.info(`Opening chat with ${studentName}`);
   };
 
-  const handleScheduleSession = (id: number, name: string) => {
-    toast.success(`Scheduling session with ${name}`);
-    console.log("Scheduling session with student:", id);
+  const handleScheduleSession = (studentName: string) => {
+    toast.info(`Scheduling session with ${studentName}`);
   };
 
-  const studentStatusCount = {
-    all: students.length,
-    active: students.filter((s) => s.status === "active").length,
-    inactive: students.filter((s) => s.status === "inactive").length,
-    new: students.filter((s) => s.status === "new").length,
-  };
+  // Filter students based on search query
+  const filteredStudents = searchQuery.length > 0
+    ? students.filter(student => 
+        student.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        student.subject.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : students;
+
+  const activeStudents = filteredStudents.filter(student => student.status === "active");
+  const inactiveStudents = filteredStudents.filter(student => student.status === "inactive");
 
   return (
-    <div className="container mx-auto p-6 space-y-8">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-        <div>
-          <h1 className="text-3xl font-bold">Students</h1>
-          <p className="text-muted-foreground mt-1">Manage your student relationships</p>
-        </div>
-        <div className="flex gap-2 mt-4 sm:mt-0">
-          <Button variant="outline" className="flex items-center gap-2">
-            <Users size={16} />
-            <span>Add Student</span>
-          </Button>
-        </div>
-      </div>
-
-      <div className="bg-card rounded-lg border border-border p-6">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-          <div className="relative w-full md:w-96">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
-              type="text"
-              placeholder="Search students..."
-              className="pl-10"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+    <div className="min-h-screen flex bg-background">
+      <TutorSidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+      
+      <div 
+        className={cn(
+          "flex-1 transition-all duration-300",
+          isSidebarOpen ? "ml-64" : "ml-20"
+        )}
+      >
+        <main className="py-8 px-6 max-w-7xl mx-auto w-full">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold mb-2">Students</h1>
+            <p className="text-muted-foreground">Manage your students and sessions</p>
           </div>
           
-          <div className="flex items-center gap-3 w-full md:w-auto">
-            <Select defaultValue={activeFilter} onValueChange={setActiveFilter}>
-              <SelectTrigger className="w-full md:w-40">
-                <SelectValue placeholder="Filter students" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Students ({studentStatusCount.all})</SelectItem>
-                <SelectItem value="active">Active ({studentStatusCount.active})</SelectItem>
-                <SelectItem value="inactive">Inactive ({studentStatusCount.inactive})</SelectItem>
-                <SelectItem value="new">New ({studentStatusCount.new})</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="space-y-6">
+            {/* Search and filter */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="relative flex-grow">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input 
+                  placeholder="Search students..." 
+                  className="pl-10"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+              <Button variant="outline" className="flex items-center gap-2">
+                <Filter className="h-4 w-4" />
+                Filter
+              </Button>
+            </div>
             
-            <Button 
-              variant="outline" 
-              size="icon" 
-              onClick={handleSortToggle}
-              className="h-10 w-10"
-            >
-              {sortDirection === "asc" ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-            </Button>
-          </div>
-        </div>
-
-        {filteredStudents.length > 0 ? (
-          <div className="space-y-4">
-            {filteredStudents.map((student) => (
-              <Card key={student.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-                    <div className="flex items-center gap-4">
-                      <Avatar className="h-12 w-12 border border-border">
-                        <AvatarImage src={student.avatarUrl} alt={student.name} />
-                        <AvatarFallback>{student.name.charAt(0)}{student.name.split(' ')[1]?.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                      
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-medium">{student.name}</h3>
-                          {student.status === "new" && (
-                            <Badge variant="default" className="bg-green-500">New</Badge>
-                          )}
-                          {student.status === "inactive" && (
-                            <Badge variant="outline" className="text-yellow-500 border-yellow-500">Inactive</Badge>
-                          )}
-                        </div>
-                        <p className="text-sm text-muted-foreground">{student.email}</p>
-                      </div>
+            {/* Stats overview */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Total Students</p>
+                      <h3 className="text-2xl font-bold mt-1">{students.length}</h3>
                     </div>
-                    
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:flex gap-x-6 gap-y-3 flex-grow mt-4 md:mt-0">
-                      <div>
-                        <p className="text-xs text-muted-foreground">Subject</p>
-                        <div className="flex items-center gap-1 mt-1">
-                          <BookOpen size={14} />
-                          <span className="text-sm">{student.subject} ({student.level})</span>
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <p className="text-xs text-muted-foreground">Sessions</p>
-                        <div className="flex items-center gap-1 mt-1">
-                          <Clock size={14} />
-                          <span className="text-sm">{student.sessionsCompleted} completed</span>
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <p className="text-xs text-muted-foreground">Last Session</p>
-                        <div className="flex items-center gap-1 mt-1">
-                          <Calendar size={14} />
-                          <span className="text-sm">
-                            {student.lastSession ? new Date(student.lastSession).toLocaleDateString() : "No sessions yet"}
-                          </span>
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <p className="text-xs text-muted-foreground">Upcoming</p>
-                        <div className="flex items-center gap-1 mt-1">
-                          <Calendar size={14} />
-                          <span className="text-sm">{student.upcomingSessions} session(s)</span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="flex gap-2 mt-4 md:mt-0 w-full md:w-auto">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex items-center gap-1"
-                        onClick={() => handleMessageStudent(student.id, student.name)}
-                      >
-                        <MessageSquare size={14} />
-                        <span>Message</span>
-                      </Button>
-                      
-                      <Button
-                        size="sm"
-                        className="flex items-center gap-1"
-                        onClick={() => handleScheduleSession(student.id, student.name)}
-                      >
-                        <Calendar size={14} />
-                        <span>Schedule</span>
-                      </Button>
+                    <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
+                      <Users className="h-6 w-6 text-primary" />
                     </div>
                   </div>
                 </CardContent>
               </Card>
-            ))}
+              
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Active Students</p>
+                      <h3 className="text-2xl font-bold mt-1">{students.filter(s => s.status === "active").length}</h3>
+                    </div>
+                    <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
+                      <Users className="h-6 w-6 text-primary" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardContent className="pt-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Upcoming Sessions</p>
+                      <h3 className="text-2xl font-bold mt-1">{students.filter(s => s.nextSession).length}</h3>
+                    </div>
+                    <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
+                      <Calendar className="h-6 w-6 text-primary" />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+            
+            {/* Students list */}
+            <Tabs defaultValue="active" className="space-y-4">
+              <TabsList>
+                <TabsTrigger value="active">Active Students</TabsTrigger>
+                <TabsTrigger value="inactive">Inactive Students</TabsTrigger>
+                <TabsTrigger value="all">All Students</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="active">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Active Students</CardTitle>
+                    <CardDescription>Students with ongoing sessions</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {activeStudents.length > 0 ? (
+                      <div className="space-y-4">
+                        {activeStudents.map((student) => (
+                          <div key={student.id} className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 border rounded-lg">
+                            <Avatar className="h-12 w-12">
+                              <AvatarImage src={student.avatar} alt={student.name} />
+                              <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-grow">
+                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                                <div>
+                                  <h3 className="font-medium">{student.name}</h3>
+                                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-sm text-muted-foreground">
+                                    <span>{student.subject}</span>
+                                    <span>{student.level}</span>
+                                  </div>
+                                </div>
+                                <div className="flex items-center mt-2 sm:mt-0">
+                                  <div className="flex items-center mr-4">
+                                    <Star className="h-4 w-4 text-yellow-500 mr-1" />
+                                    <span>{student.rating}</span>
+                                  </div>
+                                  <Badge variant="outline" className="mr-2">
+                                    {student.sessions} Sessions
+                                  </Badge>
+                                </div>
+                              </div>
+                              
+                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-3">
+                                <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-sm">
+                                  <div className="flex items-center">
+                                    <Calendar className="h-4 w-4 mr-1 text-muted-foreground" />
+                                    <span>Last: {student.lastSession}</span>
+                                  </div>
+                                  {student.nextSession && (
+                                    <div className="flex items-center">
+                                      <Calendar className="h-4 w-4 mr-1 text-muted-foreground" />
+                                      <span>Next: {student.nextSession}</span>
+                                    </div>
+                                  )}
+                                </div>
+                                
+                                <div className="flex gap-2 mt-3 sm:mt-0">
+                                  <Button size="sm" variant="outline" onClick={() => handleContactStudent(student.name)}>
+                                    <MessageSquare className="h-4 w-4 mr-1" />
+                                    Contact
+                                  </Button>
+                                  <Button size="sm" onClick={() => handleScheduleSession(student.name)}>
+                                    <Calendar className="h-4 w-4 mr-1" />
+                                    Schedule
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <Users className="mx-auto h-12 w-12 text-muted-foreground mb-3" />
+                        <h3 className="font-medium text-lg mb-1">No Active Students</h3>
+                        <p className="text-muted-foreground">You don't have any active students at the moment.</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              <TabsContent value="inactive">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Inactive Students</CardTitle>
+                    <CardDescription>Students without recent activity</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {inactiveStudents.length > 0 ? (
+                      <div className="space-y-4">
+                        {inactiveStudents.map((student) => (
+                          <div key={student.id} className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 border rounded-lg">
+                            <Avatar className="h-12 w-12">
+                              <AvatarImage src={student.avatar} alt={student.name} />
+                              <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-grow">
+                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                                <div>
+                                  <h3 className="font-medium">{student.name}</h3>
+                                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-sm text-muted-foreground">
+                                    <span>{student.subject}</span>
+                                    <span>{student.level}</span>
+                                  </div>
+                                </div>
+                                <div className="flex items-center mt-2 sm:mt-0">
+                                  <div className="flex items-center mr-4">
+                                    <Star className="h-4 w-4 text-yellow-500 mr-1" />
+                                    <span>{student.rating}</span>
+                                  </div>
+                                  <Badge variant="outline" className="mr-2">
+                                    {student.sessions} Sessions
+                                  </Badge>
+                                </div>
+                              </div>
+                              
+                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-3">
+                                <div className="flex items-center text-sm">
+                                  <Calendar className="h-4 w-4 mr-1 text-muted-foreground" />
+                                  <span>Last: {student.lastSession}</span>
+                                </div>
+                                
+                                <div className="flex gap-2 mt-3 sm:mt-0">
+                                  <Button size="sm" variant="outline" onClick={() => handleContactStudent(student.name)}>
+                                    <MessageSquare className="h-4 w-4 mr-1" />
+                                    Contact
+                                  </Button>
+                                  <Button size="sm" onClick={() => handleScheduleSession(student.name)}>
+                                    <Calendar className="h-4 w-4 mr-1" />
+                                    Schedule
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <Users className="mx-auto h-12 w-12 text-muted-foreground mb-3" />
+                        <h3 className="font-medium text-lg mb-1">No Inactive Students</h3>
+                        <p className="text-muted-foreground">You don't have any inactive students at the moment.</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+              
+              <TabsContent value="all">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>All Students</CardTitle>
+                    <CardDescription>View all your students</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {filteredStudents.length > 0 ? (
+                      <div className="space-y-4">
+                        {filteredStudents.map((student) => (
+                          <div key={student.id} className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 border rounded-lg">
+                            <Avatar className="h-12 w-12">
+                              <AvatarImage src={student.avatar} alt={student.name} />
+                              <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-grow">
+                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                                <div>
+                                  <div className="flex items-center">
+                                    <h3 className="font-medium">{student.name}</h3>
+                                    <Badge className={cn(
+                                      "ml-2",
+                                      student.status === "active" ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
+                                    )}>
+                                      {student.status === "active" ? "Active" : "Inactive"}
+                                    </Badge>
+                                  </div>
+                                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 text-sm text-muted-foreground">
+                                    <span>{student.subject}</span>
+                                    <span>{student.level}</span>
+                                  </div>
+                                </div>
+                                <div className="flex items-center mt-2 sm:mt-0">
+                                  <div className="flex items-center mr-4">
+                                    <Star className="h-4 w-4 text-yellow-500 mr-1" />
+                                    <span>{student.rating}</span>
+                                  </div>
+                                  <Badge variant="outline" className="mr-2">
+                                    {student.sessions} Sessions
+                                  </Badge>
+                                </div>
+                              </div>
+                              
+                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mt-3">
+                                <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-sm">
+                                  <div className="flex items-center">
+                                    <Calendar className="h-4 w-4 mr-1 text-muted-foreground" />
+                                    <span>Last: {student.lastSession}</span>
+                                  </div>
+                                  {student.nextSession && (
+                                    <div className="flex items-center">
+                                      <Calendar className="h-4 w-4 mr-1 text-muted-foreground" />
+                                      <span>Next: {student.nextSession}</span>
+                                    </div>
+                                  )}
+                                </div>
+                                
+                                <div className="flex gap-2 mt-3 sm:mt-0">
+                                  <Button size="sm" variant="outline" onClick={() => handleContactStudent(student.name)}>
+                                    <MessageSquare className="h-4 w-4 mr-1" />
+                                    Contact
+                                  </Button>
+                                  <Button size="sm" onClick={() => handleScheduleSession(student.name)}>
+                                    <Calendar className="h-4 w-4 mr-1" />
+                                    Schedule
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <Users className="mx-auto h-12 w-12 text-muted-foreground mb-3" />
+                        <h3 className="font-medium text-lg mb-1">No Students Found</h3>
+                        <p className="text-muted-foreground">We couldn't find any students matching your search.</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </div>
-        ) : (
-          <div className="text-center py-12">
-            <Users className="mx-auto h-12 w-12 text-muted-foreground mb-3" />
-            <h3 className="font-medium text-lg mb-1">No Students Found</h3>
-            <p className="text-muted-foreground mb-4">Try adjusting your search or filter criteria.</p>
-            <Button onClick={() => { setSearchQuery(""); setActiveFilter("all"); }}>Reset Filters</Button>
-          </div>
-        )}
+        </main>
       </div>
     </div>
   );
