@@ -2,391 +2,329 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import StudentSidebar from "@/components/StudentSidebar";
-import {
-  Search,
-  Send,
-  Paperclip,
-  Mic,
-  MoreVertical,
-  Phone,
-  Video,
-  ChevronLeft,
-  Info,
-  Star,
-  CheckCheck,
-  Check,
-  Clock,
-  Plus,
-  Image,
-  File,
-  Smile
-} from "lucide-react";
+import { MessageSquare as LucideMessageSquare, Search, User, Send, Phone, Video, MoreHorizontal, Paperclip, Image, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 
-// Types for messages
+// Define message interface
 interface Message {
-  id: number;
+  id: string;
+  senderId: string;
+  receiverId: string;
   content: string;
   timestamp: Date;
-  sender: "student" | "tutor";
-  status: "sent" | "delivered" | "read" | "pending";
-  attachments?: { name: string; type: string; url: string }[];
+  isRead: boolean;
+  attachments?: { type: string; url: string; name: string }[];
 }
 
-interface Conversation {
-  id: number;
-  tutorId: number;
-  tutorName: string;
-  tutorAvatar: string;
-  tutorSubject: string;
-  lastMessage: string;
-  lastMessageTime: Date;
+// Define contact interface
+interface Contact {
+  id: string;
+  name: string;
+  avatar: string;
+  role: string;
+  lastMessage?: Message;
+  isOnline: boolean;
   unreadCount: number;
-  online: boolean;
-  messages: Message[];
 }
 
-// Individual message component
-const MessageBubble = ({ message, isLastInGroup }: { message: Message; isLastInGroup: boolean }) => {
-  const fromMe = message.sender === "student";
-  
+// Message component
+const MessageItem = ({ message, isOwn }: { message: Message; isOwn: boolean }) => {
   return (
-    <div className={cn(
-      "flex mb-2",
-      fromMe ? "justify-end" : "justify-start"
-    )}>
-      <div className={cn(
-        "max-w-[80%] px-4 py-2 rounded-lg",
-        fromMe ? "bg-primary text-primary-foreground rounded-br-none" : "bg-secondary rounded-bl-none"
-      )}>
-        <p className="text-sm">{message.content}</p>
-        <div className={cn(
-          "flex items-center mt-1 text-xs",
-          fromMe ? "justify-end" : "justify-start",
-          fromMe ? "text-primary-foreground/80" : "text-muted-foreground"
-        )}>
-          <span>
-            {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-          </span>
-          {fromMe && isLastInGroup && (
-            <span className="ml-1">
-              {message.status === "read" ? <CheckCheck className="h-3 w-3" /> : 
-               message.status === "delivered" ? <Check className="h-3 w-3" /> : 
-               message.status === "sent" ? <Check className="h-3 w-3" /> : 
-               <Clock className="h-3 w-3" />}
-            </span>
+    <div className={cn("flex mb-4", isOwn ? "justify-end" : "justify-start")}>
+      <div className={cn("max-w-[80%]", isOwn ? "order-2" : "order-1")}>
+        <div 
+          className={cn(
+            "px-4 py-3 rounded-lg",
+            isOwn ? "bg-primary text-primary-foreground" : "bg-secondary"
+          )}
+        >
+          <p className="whitespace-pre-wrap">{message.content}</p>
+          {message.attachments && message.attachments.length > 0 && (
+            <div className="mt-2 space-y-2">
+              {message.attachments.map((attachment, index) => (
+                <div 
+                  key={index}
+                  className={cn(
+                    "flex items-center gap-2 p-2 rounded",
+                    isOwn ? "bg-primary-foreground/10" : "bg-background"
+                  )}
+                >
+                  {attachment.type === 'image' ? (
+                    <Image className="h-4 w-4" />
+                  ) : (
+                    <Paperclip className="h-4 w-4" />
+                  )}
+                  <span className="text-sm truncate">{attachment.name}</span>
+                </div>
+              ))}
+            </div>
           )}
         </div>
-        
-        {message.attachments && message.attachments.length > 0 && (
-          <div className="mt-2 space-y-1">
-            {message.attachments.map((attachment, i) => (
-              <div key={i} className="flex items-center text-xs bg-black/5 p-1 rounded">
-                {attachment.type.includes("image") ? 
-                  <Image className="h-3 w-3 mr-1" /> : 
-                  <File className="h-3 w-3 mr-1" />}
-                <span className="truncate">{attachment.name}</span>
-              </div>
-            ))}
-          </div>
-        )}
+        <p className={cn("text-xs text-muted-foreground mt-1", isOwn ? "text-right" : "text-left")}>
+          {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        </p>
       </div>
     </div>
   );
 };
 
-// Chat view component
-const ChatView = ({ conversation, onBack }: { conversation: Conversation; onBack: () => void }) => {
-  const [newMessage, setNewMessage] = useState("");
-  
-  const handleSendMessage = () => {
-    if (newMessage.trim()) {
-      toast.success("Message sent!");
-      setNewMessage("");
-    }
-  };
-  
-  return (
-    <div className="flex flex-col h-full">
-      {/* Chat header */}
-      <div className="flex items-center gap-3 p-4 border-b">
-        <Button variant="ghost" size="icon" onClick={onBack} className="md:hidden">
-          <ChevronLeft className="h-4 w-4" />
-        </Button>
-        <Avatar className="h-10 w-10">
-          <AvatarImage src={conversation.tutorAvatar} alt={conversation.tutorName} />
-          <AvatarFallback>{conversation.tutorName.charAt(0)}</AvatarFallback>
-        </Avatar>
-        <div className="flex-grow">
-          <div className="flex items-center">
-            <h3 className="font-medium">{conversation.tutorName}</h3>
-            {conversation.online && (
-              <Badge variant="secondary" className="ml-2 h-1.5 w-1.5 rounded-full bg-green-500 p-0" />
-            )}
-          </div>
-          <p className="text-xs text-muted-foreground">{conversation.tutorSubject}</p>
-        </div>
-        <div className="flex gap-1">
-          <Button variant="ghost" size="icon" onClick={() => toast.info("Audio call feature coming soon")}>
-            <Phone className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="icon" onClick={() => toast.info("Video call feature coming soon")}>
-            <Video className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="icon" onClick={() => toast.info("Conversation info")}>
-            <Info className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-      
-      {/* Messages area */}
-      <ScrollArea className="flex-grow p-4">
-        <div className="space-y-6">
-          {/* Group messages by date */}
-          <div className="text-center my-4">
-            <Badge variant="outline" className="text-xs text-muted-foreground">
-              {conversation.messages[0]?.timestamp.toLocaleDateString([], { weekday: 'long', month: 'short', day: 'numeric' })}
-            </Badge>
-          </div>
-          
-          {conversation.messages.map((message, index) => {
-            const isLastInGroup = index === conversation.messages.length - 1 || 
-              conversation.messages[index + 1].sender !== message.sender;
-            
-            return <MessageBubble key={message.id} message={message} isLastInGroup={isLastInGroup} />;
-          })}
-        </div>
-      </ScrollArea>
-      
-      {/* Message input */}
-      <div className="border-t p-4">
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={() => toast.info("Attachment picker will open here")}>
-            <Paperclip className="h-4 w-4" />
-          </Button>
-          <Input 
-            placeholder="Type a message..." 
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            className="flex-grow"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                handleSendMessage();
-              }
-            }}
-          />
-          <Button variant="ghost" size="icon" onClick={() => toast.info("Emoji picker will open here")}>
-            <Smile className="h-4 w-4" />
-          </Button>
-          <Button 
-            size="icon" 
-            disabled={!newMessage.trim()} 
-            onClick={handleSendMessage}
-          >
-            <Send className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Conversation list item
-const ConversationItem = ({ 
-  conversation, 
-  isActive, 
-  onClick 
-}: { 
-  conversation: Conversation; 
-  isActive: boolean; 
-  onClick: () => void;
-}) => {
-  const lastMessageTime = new Date(conversation.lastMessageTime);
-  const isToday = new Date().toDateString() === lastMessageTime.toDateString();
-  const timeString = isToday 
-    ? lastMessageTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    : lastMessageTime.toLocaleDateString([], { month: 'short', day: 'numeric' });
-  
+// Contact item component
+const ContactItem = ({ contact, isActive, onClick }: { contact: Contact; isActive: boolean; onClick: () => void }) => {
   return (
     <div 
-      onClick={onClick}
       className={cn(
-        "flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-secondary/80 transition-colors",
+        "flex items-center gap-3 p-3 rounded-md cursor-pointer hover:bg-secondary/50",
         isActive && "bg-secondary"
       )}
+      onClick={onClick}
     >
       <div className="relative">
-        <Avatar className="h-12 w-12">
-          <AvatarImage src={conversation.tutorAvatar} alt={conversation.tutorName} />
-          <AvatarFallback>{conversation.tutorName.charAt(0)}</AvatarFallback>
+        <Avatar>
+          <AvatarImage src={contact.avatar} alt={contact.name} />
+          <AvatarFallback>{contact.name.charAt(0)}</AvatarFallback>
         </Avatar>
-        {conversation.online && (
-          <Badge className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 p-0 border-2 border-background" />
+        {contact.isOnline && (
+          <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-green-500 border-2 border-background"></span>
         )}
       </div>
       <div className="flex-grow min-w-0">
         <div className="flex justify-between items-center">
-          <h3 className="font-medium truncate">{conversation.tutorName}</h3>
-          <span className="text-xs text-muted-foreground shrink-0">{timeString}</span>
+          <h3 className="font-medium truncate">{contact.name}</h3>
+          {contact.lastMessage && (
+            <span className="text-xs text-muted-foreground">
+              {new Date(contact.lastMessage.timestamp).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+            </span>
+          )}
         </div>
-        <p className="text-sm text-muted-foreground truncate">{conversation.lastMessage}</p>
+        <div className="flex justify-between items-center">
+          <p className="text-sm text-muted-foreground truncate">
+            {contact.lastMessage ? contact.lastMessage.content : "No messages yet"}
+          </p>
+          {contact.unreadCount > 0 && (
+            <Badge variant="default" className="ml-2 h-5 w-5 rounded-full p-0 flex items-center justify-center">
+              {contact.unreadCount}
+            </Badge>
+          )}
+        </div>
       </div>
-      {conversation.unreadCount > 0 && (
-        <Badge className="shrink-0 h-5 w-5 flex items-center justify-center p-0">
-          {conversation.unreadCount}
-        </Badge>
-      )}
     </div>
   );
 };
 
 const MessagesPage = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [activeConversation, setActiveConversation] = useState<number | null>(null);
+  const [messageInput, setMessageInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  
-  // Mock data for conversations
-  const conversations: Conversation[] = [
+  const [selectedContactId, setSelectedContactId] = useState<string | null>(null);
+  const [isContactsListVisible, setIsContactsListVisible] = useState(true);
+
+  // Mock data for contacts
+  const contacts: Contact[] = [
     {
-      id: 1,
-      tutorId: 101,
-      tutorName: "Dr. Michael Smith",
-      tutorAvatar: "https://i.pravatar.cc/150?img=35",
-      tutorSubject: "Mathematics Tutor",
-      lastMessage: "Let me know if you have questions about the homework",
-      lastMessageTime: new Date(Date.now() - 20 * 60 * 1000), // 20 minutes ago
+      id: "1",
+      name: "Dr. Michael Smith",
+      avatar: "https://i.pravatar.cc/150?img=35",
+      role: "Calculus Tutor",
+      isOnline: true,
       unreadCount: 2,
-      online: true,
-      messages: [
-        {
-          id: 1001,
-          content: "Hi Sarah, how are you doing with the calculus problems?",
-          timestamp: new Date(Date.now() - 40 * 60 * 1000), // 40 minutes ago
-          sender: "tutor",
-          status: "read"
-        },
-        {
-          id: 1002,
-          content: "I'm struggling with problem #4. Could you explain the integration by parts again?",
-          timestamp: new Date(Date.now() - 35 * 60 * 1000), // 35 minutes ago
-          sender: "student",
-          status: "read"
-        },
-        {
-          id: 1003,
-          content: "Of course! For integration by parts, we use the formula ∫u dv = uv - ∫v du. In this case, let's set u = x and dv = e^x dx.",
-          timestamp: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
-          sender: "tutor",
-          status: "read"
-        },
-        {
-          id: 1004,
-          content: "Let me know if you have questions about the homework",
-          timestamp: new Date(Date.now() - 20 * 60 * 1000), // 20 minutes ago
-          sender: "tutor",
-          status: "delivered"
-        }
-      ]
+      lastMessage: {
+        id: "m1",
+        senderId: "1",
+        receiverId: "user",
+        content: "Don't forget to review the practice problems I sent you for tomorrow's session.",
+        timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
+        isRead: false
+      }
     },
     {
-      id: 2,
-      tutorId: 102,
-      tutorName: "Prof. Emily Chen",
-      tutorAvatar: "https://i.pravatar.cc/150?img=45",
-      tutorSubject: "English Literature",
-      lastMessage: "I've attached some notes on Shakespeare's symbolism",
-      lastMessageTime: new Date(Date.now() - 3 * 60 * 60 * 1000), // 3 hours ago
+      id: "2",
+      name: "Prof. Emily Chen",
+      avatar: "https://i.pravatar.cc/150?img=45",
+      role: "English Literature Tutor",
+      isOnline: false,
       unreadCount: 0,
-      online: false,
-      messages: [
-        {
-          id: 2001,
-          content: "I've been reviewing your essay draft. You have some very insightful analysis!",
-          timestamp: new Date(Date.now() - 4 * 60 * 60 * 1000), // 4 hours ago
-          sender: "tutor",
-          status: "read"
-        },
-        {
-          id: 2002,
-          content: "Thank you! I'm still working on the conclusion section. Do you have any suggestions?",
-          timestamp: new Date(Date.now() - 3.5 * 60 * 60 * 1000), // 3.5 hours ago
-          sender: "student",
-          status: "read"
-        },
-        {
-          id: 2003,
-          content: "I've attached some notes on Shakespeare's symbolism",
-          timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000), // 3 hours ago
-          sender: "tutor",
-          status: "read",
-          attachments: [
-            {
-              name: "Shakespeare_Symbolism_Notes.pdf",
-              type: "application/pdf",
-              url: "#"
-            }
-          ]
-        }
-      ]
+      lastMessage: {
+        id: "m2",
+        senderId: "user",
+        receiverId: "2",
+        content: "I finished reading the Shakespeare play and have some questions for our next session.",
+        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 3), // 3 hours ago
+        isRead: true
+      }
     },
     {
-      id: 3,
-      tutorId: 103,
-      tutorName: "Dr. James Lee",
-      tutorAvatar: "https://i.pravatar.cc/150?img=68",
-      tutorSubject: "Chemistry",
-      lastMessage: "Don't forget our session tomorrow at 2 PM",
-      lastMessageTime: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
+      id: "3",
+      name: "Dr. James Lee",
+      avatar: "https://i.pravatar.cc/150?img=68",
+      role: "Chemistry Tutor",
+      isOnline: true,
       unreadCount: 0,
-      online: true,
-      messages: [
-        {
-          id: 3001,
-          content: "How's your lab report coming along?",
-          timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
-          sender: "tutor",
-          status: "read"
-        },
-        {
-          id: 3002,
-          content: "I've finished the methods section, but I'm still working on the results analysis",
-          timestamp: new Date(Date.now() - 1.5 * 24 * 60 * 60 * 1000), // 1.5 days ago
-          sender: "student",
-          status: "read"
-        },
-        {
-          id: 3003,
-          content: "Don't forget our session tomorrow at 2 PM",
-          timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
-          sender: "tutor",
-          status: "read"
-        }
-      ]
+      lastMessage: {
+        id: "m3",
+        senderId: "3",
+        receiverId: "user",
+        content: "Here's the study guide for organic chemistry. Let me know if you have questions.",
+        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
+        isRead: true,
+        attachments: [
+          { type: "file", url: "#", name: "Organic_Chemistry_Guide.pdf" }
+        ]
+      }
+    },
+    {
+      id: "4",
+      name: "Prof. Lisa Johnson",
+      avatar: "https://i.pravatar.cc/150?img=20",
+      role: "Biology Tutor",
+      isOnline: false,
+      unreadCount: 0,
+      lastMessage: {
+        id: "m4",
+        senderId: "user",
+        receiverId: "4",
+        content: "Thank you for the feedback on my lab report!",
+        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2), // 2 days ago
+        isRead: true
+      }
+    },
+    {
+      id: "5",
+      name: "Dr. Robert Wilson",
+      avatar: "https://i.pravatar.cc/150?img=60",
+      role: "Physics Tutor",
+      isOnline: false,
+      unreadCount: 1,
+      lastMessage: {
+        id: "m5",
+        senderId: "5",
+        receiverId: "user",
+        content: "I've scheduled our next session to cover quantum mechanics concepts.",
+        timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3), // 3 days ago
+        isRead: false
+      }
     }
   ];
+
+  // Filter contacts based on search query
+  const filteredContacts = searchQuery.trim() === "" 
+    ? contacts 
+    : contacts.filter(contact => 
+        contact.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        contact.role.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+
+  // Get selected contact
+  const selectedContact = selectedContactId 
+    ? contacts.find(contact => contact.id === selectedContactId) 
+    : null;
+
+  // Mock messages for the conversation
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: "m1",
+      senderId: "1",
+      receiverId: "user",
+      content: "Hello! How are your calculus studies going? Are you making progress with the differential equations?",
+      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
+      isRead: true
+    },
+    {
+      id: "m2",
+      senderId: "user",
+      receiverId: "1",
+      content: "Hi Dr. Smith! I've been working through the problems but still struggling with the integration by parts method.",
+      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 23), // 23 hours ago
+      isRead: true
+    },
+    {
+      id: "m3",
+      senderId: "1",
+      receiverId: "user",
+      content: "I understand. It can be challenging at first. Let's dedicate some time to that in our next session. I'll prepare some examples that should help clarify the concept.",
+      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 22), // 22 hours ago
+      isRead: true
+    },
+    {
+      id: "m4",
+      senderId: "user",
+      receiverId: "1",
+      content: "That would be great! I've been trying to work through the textbook examples but could really use your guidance.",
+      timestamp: new Date(Date.now() - 1000 * 60 * 60 * 20), // 20 hours ago
+      isRead: true
+    },
+    {
+      id: "m5",
+      senderId: "1",
+      receiverId: "user",
+      content: "Here are some additional practice problems that focus specifically on integration by parts. Try working through these before our session.",
+      timestamp: new Date(Date.now() - 1000 * 60 * 60), // 1 hour ago
+      isRead: true,
+      attachments: [
+        { type: "file", url: "#", name: "Integration_Practice.pdf" }
+      ]
+    },
+    {
+      id: "m6",
+      senderId: "1",
+      receiverId: "user",
+      content: "Don't forget to review the practice problems I sent you for tomorrow's session.",
+      timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
+      isRead: false
+    }
+  ]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
-  
-  const filteredConversations = conversations.filter(conversation => 
-    conversation.tutorName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    conversation.tutorSubject.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-  
-  const activeConversationData = conversations.find(c => c.id === activeConversation);
-  
-  const handleBackToList = () => {
-    setActiveConversation(null);
+
+  const handleSendMessage = () => {
+    if (messageInput.trim() === "" || !selectedContactId) return;
+
+    const newMessage: Message = {
+      id: `m${messages.length + 1}`,
+      senderId: "user",
+      receiverId: selectedContactId,
+      content: messageInput.trim(),
+      timestamp: new Date(),
+      isRead: false
+    };
+
+    setMessages([...messages, newMessage]);
+    setMessageInput("");
+
+    // Simulate reply after a delay
+    if (selectedContactId === "1") {
+      setTimeout(() => {
+        const reply: Message = {
+          id: `m${messages.length + 2}`,
+          senderId: selectedContactId,
+          receiverId: "user",
+          content: "Great! I'll see you in tomorrow's session then. Don't hesitate to ask if you have any questions before then.",
+          timestamp: new Date(),
+          isRead: false
+        };
+        setMessages(prev => [...prev, reply]);
+      }, 30000); // 30 seconds
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
+  const toggleContactsList = () => {
+    setIsContactsListVisible(!isContactsListVisible);
   };
 
   return (
@@ -399,90 +337,210 @@ const MessagesPage = () => {
           isSidebarOpen ? "ml-64" : "ml-20"
         )}
       >
-        <main className="py-8 px-6 h-[calc(100vh-64px)]">
-          <div className="flex h-full">
-            {/* Conversations List - hide on mobile when a conversation is active */}
-            <div className={cn(
-              "flex flex-col w-full md:w-80 border-r mr-6",
-              activeConversation !== null && "hidden md:flex"
-            )}>
-              <div className="mb-6">
-                <h1 className="text-3xl font-bold mb-2">Messages</h1>
-                <p className="text-muted-foreground">Chat with your tutors</p>
-              </div>
-              
-              <div className="relative mb-4">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input 
-                  placeholder="Search messages..." 
-                  className="pl-9"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              
-              <Tabs defaultValue="all" className="mb-4">
-                <TabsList className="w-full">
-                  <TabsTrigger value="all" className="flex-1">All</TabsTrigger>
-                  <TabsTrigger value="unread" className="flex-1">Unread</TabsTrigger>
-                </TabsList>
-              </Tabs>
-              
-              <ScrollArea className="flex-grow">
-                <div className="space-y-1">
-                  {filteredConversations.length > 0 ? (
-                    filteredConversations.map(conversation => (
-                      <ConversationItem 
-                        key={conversation.id}
-                        conversation={conversation}
-                        isActive={activeConversation === conversation.id}
-                        onClick={() => setActiveConversation(conversation.id)}
-                      />
-                    ))
-                  ) : (
-                    <div className="text-center py-8">
-                      <p className="text-muted-foreground">No conversations found</p>
-                    </div>
-                  )}
+        <div className="flex h-[calc(100vh-4rem)] max-h-[calc(100vh-4rem)] overflow-hidden">
+          {/* Contacts List */}
+          <div 
+            className={cn(
+              "border-r bg-card transition-all duration-300",
+              isContactsListVisible ? "w-80" : "w-0"
+            )}
+          >
+            {isContactsListVisible && (
+              <>
+                <div className="p-4 border-b">
+                  <h2 className="text-xl font-bold mb-4">Messages</h2>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input 
+                      className="pl-9" 
+                      placeholder="Search messages" 
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
                 </div>
-              </ScrollArea>
-              
-              <div className="mt-4 pt-4 border-t">
-                <Button variant="outline" className="w-full" onClick={() => toast.info("New message dialog will open here")}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  New Message
-                </Button>
-              </div>
-            </div>
-            
-            {/* Chat Area or Empty State */}
-            <div className={cn(
-              "flex-grow h-full",
-              activeConversation === null && "hidden md:block"
-            )}>
-              {activeConversationData ? (
-                <ChatView 
-                  conversation={activeConversationData} 
-                  onBack={handleBackToList}
-                />
-              ) : (
-                <div className="flex items-center justify-center h-full">
-                  <div className="text-center max-w-md">
-                    <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <h2 className="text-xl font-semibold mb-2">Select a Conversation</h2>
-                    <p className="text-muted-foreground mb-6">
-                      Choose a conversation from the left or start a new one to begin messaging with your tutors.
-                    </p>
-                    <Button onClick={() => toast.info("New message dialog will open here")}>
-                      <Plus className="mr-2 h-4 w-4" />
-                      New Message
+                
+                <div className="p-2">
+                  <Tabs defaultValue="all" className="w-full">
+                    <TabsList className="grid grid-cols-3 mb-2">
+                      <TabsTrigger value="all">All</TabsTrigger>
+                      <TabsTrigger value="unread">Unread</TabsTrigger>
+                      <TabsTrigger value="tutors">Tutors</TabsTrigger>
+                    </TabsList>
+                    <TabsContent value="all" className="mt-0">
+                      <div className="space-y-1 max-h-[calc(100vh-14rem)] overflow-y-auto">
+                        {filteredContacts.map(contact => (
+                          <ContactItem 
+                            key={contact.id} 
+                            contact={contact} 
+                            isActive={selectedContactId === contact.id}
+                            onClick={() => {
+                              setSelectedContactId(contact.id);
+                              if (window.innerWidth < 768) {
+                                setIsContactsListVisible(false);
+                              }
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </TabsContent>
+                    <TabsContent value="unread" className="mt-0">
+                      <div className="space-y-1 max-h-[calc(100vh-14rem)] overflow-y-auto">
+                        {filteredContacts.filter(c => c.unreadCount > 0).map(contact => (
+                          <ContactItem 
+                            key={contact.id} 
+                            contact={contact} 
+                            isActive={selectedContactId === contact.id}
+                            onClick={() => {
+                              setSelectedContactId(contact.id);
+                              if (window.innerWidth < 768) {
+                                setIsContactsListVisible(false);
+                              }
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </TabsContent>
+                    <TabsContent value="tutors" className="mt-0">
+                      <div className="space-y-1 max-h-[calc(100vh-14rem)] overflow-y-auto">
+                        {filteredContacts.map(contact => (
+                          <ContactItem 
+                            key={contact.id} 
+                            contact={contact} 
+                            isActive={selectedContactId === contact.id}
+                            onClick={() => {
+                              setSelectedContactId(contact.id);
+                              if (window.innerWidth < 768) {
+                                setIsContactsListVisible(false);
+                              }
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </TabsContent>
+                  </Tabs>
+                </div>
+              </>
+            )}
+          </div>
+          
+          {/* Message Area */}
+          <div className="flex-1 flex flex-col">
+            {selectedContact ? (
+              <>
+                {/* Chat Header */}
+                <div className="p-4 border-b flex justify-between items-center bg-card">
+                  <div className="flex items-center gap-3">
+                    {!isContactsListVisible && (
+                      <Button variant="ghost" size="icon" onClick={toggleContactsList} className="md:hidden">
+                        <ChevronRight className="h-5 w-5" />
+                      </Button>
+                    )}
+                    <Avatar>
+                      <AvatarImage src={selectedContact.avatar} alt={selectedContact.name} />
+                      <AvatarFallback>{selectedContact.name.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-medium">{selectedContact.name}</h3>
+                        {selectedContact.isOnline && (
+                          <Badge variant="outline" className="h-5 text-xs bg-green-500/10 text-green-500 border-green-500/20">
+                            Online
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground">{selectedContact.role}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Button variant="ghost" size="icon" onClick={() => toast.info("This would start an audio call")}>
+                      <Phone className="h-5 w-5" />
+                    </Button>
+                    <Button variant="ghost" size="icon" onClick={() => toast.info("This would start a video call")}>
+                      <Video className="h-5 w-5" />
+                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreHorizontal className="h-5 w-5" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Options</DropdownMenuLabel>
+                        <DropdownMenuItem onClick={() => toast.info("View contact profile")}>
+                          View Profile
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => toast.info("Shared files would be shown")}>
+                          Shared Files
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => toast.info("Search this conversation")}>
+                          Search in Conversation
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => toast.info("Conversation muted")}>
+                          Mute Notifications
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem 
+                          onClick={() => toast.info("This would clear conversation history")}
+                          className="text-destructive"
+                        >
+                          Clear Conversation
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+                
+                {/* Messages Container */}
+                <div className="flex-1 p-4 overflow-y-auto bg-background">
+                  {messages.map(message => (
+                    <MessageItem 
+                      key={message.id} 
+                      message={message} 
+                      isOwn={message.senderId === "user"} 
+                    />
+                  ))}
+                </div>
+                
+                {/* Message Input */}
+                <div className="p-4 border-t bg-card">
+                  <div className="flex items-end gap-2">
+                    <Button variant="ghost" size="icon" className="mb-1" onClick={() => toast.info("This would open the file picker")}>
+                      <Paperclip className="h-5 w-5" />
+                    </Button>
+                    <div className="flex-1">
+                      <Input
+                        className="min-h-[2.5rem] resize-none"
+                        placeholder="Type your message..."
+                        value={messageInput}
+                        onChange={(e) => setMessageInput(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                      />
+                    </div>
+                    <Button onClick={handleSendMessage} disabled={messageInput.trim() === ""}>
+                      <Send className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
-              )}
-            </div>
+              </>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full bg-card">
+                <LucideMessageSquare className="h-16 w-16 text-muted-foreground mb-4" />
+                <h2 className="text-xl font-bold mb-2">Your Messages</h2>
+                <p className="text-muted-foreground mb-4 text-center max-w-md">
+                  Select a conversation or start a new one with your tutors.
+                </p>
+                {!isContactsListVisible && (
+                  <Button onClick={toggleContactsList}>
+                    <ChevronRight className="mr-2 h-4 w-4" />
+                    Open Conversations
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
-        </main>
+        </div>
       </div>
     </div>
   );
