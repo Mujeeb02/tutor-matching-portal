@@ -1,5 +1,7 @@
 
-import React from "react";
+import { useState } from "react";
+import { cn } from "@/lib/utils";
+import StudentSidebar from "@/components/StudentSidebar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -152,6 +154,12 @@ const PastTutorCard = ({ tutor }: { tutor: Tutor }) => {
 
 // Main component
 const MyTutorsPage = () => {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
   // Mock data
   const currentTutors: Tutor[] = [
     {
@@ -234,119 +242,130 @@ const MyTutorsPage = () => {
   };
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">My Tutors</h1>
-        <p className="text-muted-foreground">Manage and view your tutoring relationships</p>
-      </div>
+    <div className="min-h-screen flex bg-background">
+      <StudentSidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
       
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Total Sessions</p>
-                <h3 className="text-2xl font-bold mt-1">{stats.totalSessions}</h3>
+      <div 
+        className={cn(
+          "flex-1 transition-all duration-300",
+          isSidebarOpen ? "ml-64" : "ml-20"
+        )}
+      >
+        <div className="container mx-auto p-6">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold mb-2">My Tutors</h1>
+            <p className="text-muted-foreground">Manage and view your tutoring relationships</p>
+          </div>
+          
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Sessions</p>
+                    <h3 className="text-2xl font-bold mt-1">{stats.totalSessions}</h3>
+                  </div>
+                  <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
+                    <CalendarIcon className="h-6 w-6 text-primary" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Learning Hours</p>
+                    <h3 className="text-2xl font-bold mt-1">{stats.totalHours}</h3>
+                  </div>
+                  <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
+                    <Clock className="h-6 w-6 text-primary" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Active Tutors</p>
+                    <h3 className="text-2xl font-bold mt-1">{stats.activeTutors}</h3>
+                  </div>
+                  <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
+                    <BookOpen className="h-6 w-6 text-primary" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Completed Courses</p>
+                    <h3 className="text-2xl font-bold mt-1">{stats.completedCourses}</h3>
+                  </div>
+                  <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
+                    <BarChart2 className="h-6 w-6 text-primary" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          
+          {/* Tabs for Current and Past Tutors */}
+          <Tabs defaultValue="current">
+            <TabsList className="mb-6">
+              <TabsTrigger value="current">Current Tutors</TabsTrigger>
+              <TabsTrigger value="past">Past Tutors</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="current">
+              <div className="space-y-6">
+                {currentTutors.length > 0 ? (
+                  currentTutors.map(tutor => (
+                    <TutorCard key={tutor.id} tutor={tutor} />
+                  ))
+                ) : (
+                  <Card>
+                    <CardContent className="text-center py-12">
+                      <BookOpen className="mx-auto h-12 w-12 text-muted-foreground mb-3" />
+                      <h3 className="font-medium text-lg mb-1">No Current Tutors</h3>
+                      <p className="text-muted-foreground mb-4">
+                        You don't have any active tutoring relationships at the moment.
+                      </p>
+                      <Button>Find Tutors</Button>
+                    </CardContent>
+                  </Card>
+                )}
               </div>
-              <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
-                <CalendarIcon className="h-6 w-6 text-primary" />
+            </TabsContent>
+            
+            <TabsContent value="past">
+              <div className="space-y-6">
+                {pastTutors.length > 0 ? (
+                  pastTutors.map(tutor => (
+                    <PastTutorCard key={tutor.id} tutor={tutor} />
+                  ))
+                ) : (
+                  <Card>
+                    <CardContent className="text-center py-12">
+                      <BookOpen className="mx-auto h-12 w-12 text-muted-foreground mb-3" />
+                      <h3 className="font-medium text-lg mb-1">No Past Tutors</h3>
+                      <p className="text-muted-foreground">
+                        You don't have any past tutoring relationships.
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
               </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Learning Hours</p>
-                <h3 className="text-2xl font-bold mt-1">{stats.totalHours}</h3>
-              </div>
-              <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
-                <Clock className="h-6 w-6 text-primary" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Active Tutors</p>
-                <h3 className="text-2xl font-bold mt-1">{stats.activeTutors}</h3>
-              </div>
-              <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
-                <BookOpen className="h-6 w-6 text-primary" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">Completed Courses</p>
-                <h3 className="text-2xl font-bold mt-1">{stats.completedCourses}</h3>
-              </div>
-              <div className="h-12 w-12 rounded-full bg-primary/20 flex items-center justify-center">
-                <BarChart2 className="h-6 w-6 text-primary" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
-      
-      {/* Tabs for Current and Past Tutors */}
-      <Tabs defaultValue="current">
-        <TabsList className="mb-6">
-          <TabsTrigger value="current">Current Tutors</TabsTrigger>
-          <TabsTrigger value="past">Past Tutors</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="current">
-          <div className="space-y-6">
-            {currentTutors.length > 0 ? (
-              currentTutors.map(tutor => (
-                <TutorCard key={tutor.id} tutor={tutor} />
-              ))
-            ) : (
-              <Card>
-                <CardContent className="text-center py-12">
-                  <BookOpen className="mx-auto h-12 w-12 text-muted-foreground mb-3" />
-                  <h3 className="font-medium text-lg mb-1">No Current Tutors</h3>
-                  <p className="text-muted-foreground mb-4">
-                    You don't have any active tutoring relationships at the moment.
-                  </p>
-                  <Button>Find Tutors</Button>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="past">
-          <div className="space-y-6">
-            {pastTutors.length > 0 ? (
-              pastTutors.map(tutor => (
-                <PastTutorCard key={tutor.id} tutor={tutor} />
-              ))
-            ) : (
-              <Card>
-                <CardContent className="text-center py-12">
-                  <BookOpen className="mx-auto h-12 w-12 text-muted-foreground mb-3" />
-                  <h3 className="font-medium text-lg mb-1">No Past Tutors</h3>
-                  <p className="text-muted-foreground">
-                    You don't have any past tutoring relationships.
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </TabsContent>
-      </Tabs>
     </div>
   );
 };

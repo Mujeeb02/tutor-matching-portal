@@ -204,7 +204,7 @@ const AnalyticsPage = () => {
                             <XAxis dataKey="month" />
                             <YAxis />
                             <RechartsTooltip />
-                            <Line type="monotone" dataKey="hours" stroke="#8884d8" activeDot={{ r: a }} />
+                            <Line type="monotone" dataKey="hours" stroke="#8884d8" activeDot={{ r: 8 }} />
                           </RechartsLineChart>
                         </ResponsiveContainer>
                       </div>
