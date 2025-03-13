@@ -1,110 +1,118 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import StudentSidebar from "@/components/StudentSidebar";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Search, Filter, Calendar, Star, MessageSquare, GraduationCap, Users, BookOpen, Clock } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
+import { Check, MessageCircle, Star, Video } from "lucide-react";
+import StudentSidebar from "@/components/StudentSidebar";
 import SearchFilters from "@/components/SearchFilters";
+
+// Define types for the filter state
+interface FilterState {
+  subject: string;
+  priceRange: [number, number];
+  availability: string;
+  rating: number;
+  experience: string;
+  searchQuery: string;
+}
+
+// Define props for SearchFilters component
+interface FilterProps {
+  filters: FilterState;
+  onFilterChange: (filters: FilterState) => void;
+}
+
+// Mock tutor data
+const tutors = [
+  {
+    id: 1,
+    name: "Dr. Michael Smith",
+    avatar: "https://i.pravatar.cc/150?img=35",
+    rating: 4.9,
+    reviews: 127,
+    subject: "Mathematics",
+    specialization: "Calculus, Linear Algebra",
+    hourlyRate: 45,
+    education: "Ph.D. in Mathematics, Stanford University",
+    bio: "Experienced math tutor with 10+ years of teaching at university level. I specialize in making complex concepts easy to understand.",
+    availability: "Weekdays evenings, Weekends",
+    badges: ["Top Rated", "Quick Responder"],
+    isOnline: true,
+  },
+  {
+    id: 2,
+    name: "Prof. Emily Chen",
+    avatar: "https://i.pravatar.cc/150?img=45",
+    rating: 4.8,
+    reviews: 98,
+    subject: "English Literature",
+    specialization: "Shakespeare, Creative Writing",
+    hourlyRate: 40,
+    education: "M.A. in English Literature, Yale University",
+    bio: "Passionate about literature and helping students improve their writing skills. I've published several papers on modern literature.",
+    availability: "Flexible schedule",
+    badges: ["English Expert"],
+    isOnline: false,
+  },
+  {
+    id: 3,
+    name: "Dr. James Lee",
+    avatar: "https://i.pravatar.cc/150?img=68",
+    rating: 4.7,
+    reviews: 156,
+    subject: "Chemistry",
+    specialization: "Organic Chemistry, Biochemistry",
+    hourlyRate: 50,
+    education: "Ph.D. in Chemistry, MIT",
+    bio: "Chemistry professor with a knack for explaining complex reactions. I've helped hundreds of students excel in their chemistry courses.",
+    availability: "Weekends, Thursday afternoons",
+    badges: ["Science Expert", "Top Rated"],
+    isOnline: true,
+  },
+  {
+    id: 4,
+    name: "Prof. Lisa Johnson",
+    avatar: "https://i.pravatar.cc/150?img=20",
+    rating: 4.9,
+    reviews: 210,
+    subject: "Biology",
+    specialization: "Molecular Biology, Genetics",
+    hourlyRate: 48,
+    education: "Ph.D. in Molecular Biology, Harvard University",
+    bio: "I make biology fun and engaging! With my visual teaching style, complex concepts become easy to understand and remember.",
+    availability: "Monday-Friday, afternoons",
+    badges: ["Science Expert", "Quick Responder"],
+    isOnline: false,
+  },
+];
 
 const FindTutorsPage = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [filters, setFilters] = useState<FilterState>({
+    subject: "all",
+    priceRange: [20, 100],
+    availability: "all",
+    rating: 4,
+    experience: "all",
+    searchQuery: "",
+  });
+
+  // Handler for filter changes
+  const handleFilterChange = (newFilters: FilterState) => {
+    setFilters(newFilters);
+  };
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
-
-  // Mock data for tutors
-  const tutors = [
-    {
-      id: 1,
-      name: "Dr. Robert Wilson",
-      avatar: "https://i.pravatar.cc/150?img=60",
-      subject: "Physics",
-      specialization: "Quantum Mechanics, Theoretical Physics",
-      rating: 4.9,
-      reviews: 124,
-      hourlyRate: 45,
-      availability: "Mon, Wed, Fri",
-      bio: "PhD in Physics with 10+ years teaching experience at university level. Specializes in making complex concepts easy to understand."
-    },
-    {
-      id: 2,
-      name: "Prof. Lisa Johnson",
-      avatar: "https://i.pravatar.cc/150?img=20",
-      subject: "Biology",
-      specialization: "Molecular Biology, Genetics",
-      rating: 4.8,
-      reviews: 98,
-      hourlyRate: 40,
-      availability: "Tue, Thu, Sat",
-      bio: "Professor with extensive research experience. Patient and methodical teaching style with focus on practical applications."
-    },
-    {
-      id: 3,
-      name: "Dr. James Lee",
-      avatar: "https://i.pravatar.cc/150?img=68",
-      subject: "Chemistry",
-      specialization: "Organic Chemistry, Biochemistry",
-      rating: 4.7,
-      reviews: 87,
-      hourlyRate: 42,
-      availability: "Mon, Tue, Thu",
-      bio: "PhD in Chemistry with industry and academic experience. Passionate about making science accessible to all students."
-    },
-    {
-      id: 4,
-      name: "Sarah Miller",
-      avatar: "https://i.pravatar.cc/150?img=34",
-      subject: "Mathematics",
-      specialization: "Calculus, Linear Algebra, Statistics",
-      rating: 4.9,
-      reviews: 156,
-      hourlyRate: 38,
-      availability: "Mon-Sat",
-      bio: "Mathematics expert with a gift for explaining complex concepts in simple terms. Tailors teaching to individual learning styles."
-    },
-    {
-      id: 5,
-      name: "Prof. Michael Brown",
-      avatar: "https://i.pravatar.cc/150?img=53",
-      subject: "English Literature",
-      specialization: "Shakespeare, Modern Literature, Essay Writing",
-      rating: 4.6,
-      reviews: 112,
-      hourlyRate: 35,
-      availability: "Wed, Fri, Sat",
-      bio: "Literature professor with published works. Focuses on developing critical thinking and writing skills through literary analysis."
-    },
-    {
-      id: 6,
-      name: "Dr. Emily Chen",
-      avatar: "https://i.pravatar.cc/150?img=45",
-      subject: "Computer Science",
-      specialization: "Programming, Data Structures, AI",
-      rating: 4.8,
-      reviews: 104,
-      hourlyRate: 50,
-      availability: "Tue, Thu, Sun",
-      bio: "Computer Science PhD with Silicon Valley experience. Practical teaching approach with real-world programming challenges."
-    }
-  ];
-
-  // Featured subjects
-  const subjects = [
-    { name: "Mathematics", count: 45, icon: BookOpen },
-    { name: "Physics", count: 32, icon: GraduationCap },
-    { name: "Chemistry", count: 28, icon: BookOpen },
-    { name: "Biology", count: 35, icon: BookOpen },
-    { name: "Computer Science", count: 40, icon: BookOpen },
-    { name: "English", count: 42, icon: BookOpen },
-    { name: "History", count: 25, icon: BookOpen },
-    { name: "Economics", count: 20, icon: BookOpen }
-  ];
 
   return (
     <div className="min-h-screen flex bg-background">
@@ -119,189 +127,171 @@ const FindTutorsPage = () => {
         <main className="py-8 px-6 max-w-7xl mx-auto w-full">
           <div className="mb-8">
             <h1 className="text-3xl font-bold mb-2">Find Tutors</h1>
-            <p className="text-muted-foreground">Discover the perfect tutor for your learning needs</p>
+            <p className="text-muted-foreground">Discover expert tutors for any subject or topic</p>
           </div>
-
-          {/* Search and Filter Section */}
-          <div className="mb-8">
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex flex-col md:flex-row gap-4">
-                  <div className="relative flex-grow">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+          
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Search and Filters */}
+            <div className="lg:col-span-1">
+              <Card>
+                <CardContent className="p-6">
+                  <div className="mb-6">
+                    <Label htmlFor="search" className="text-base font-medium">Search Tutors</Label>
                     <Input 
-                      placeholder="Search by subject, name, or keyword" 
-                      className="pl-10"
+                      id="search" 
+                      placeholder="Search by name or subject..." 
+                      className="mt-1"
+                      value={filters.searchQuery}
+                      onChange={(e) => setFilters({...filters, searchQuery: e.target.value})}
                     />
                   </div>
-                  <div className="flex gap-2">
-                    <Button>
-                      <Search className="mr-2 h-4 w-4" />
-                      Search
-                    </Button>
-                    <Button variant="outline">
-                      <Filter className="mr-2 h-4 w-4" />
-                      Filters
-                    </Button>
-                  </div>
-                </div>
-
-                <SearchFilters />
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Main Content */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Tutor Listings */}
-            <div className="lg:col-span-2">
-              <Tabs defaultValue="all">
+                  
+                  <SearchFilters filters={filters} onFilterChange={handleFilterChange} />
+                </CardContent>
+              </Card>
+            </div>
+            
+            {/* Tutor List */}
+            <div className="lg:col-span-3">
+              <Tabs defaultValue="grid">
                 <div className="flex justify-between items-center mb-4">
-                  <TabsList>
-                    <TabsTrigger value="all">All Tutors</TabsTrigger>
-                    <TabsTrigger value="recommended">Recommended</TabsTrigger>
-                    <TabsTrigger value="popular">Popular</TabsTrigger>
-                  </TabsList>
                   <div className="text-sm text-muted-foreground">
-                    Showing {tutors.length} tutors
+                    Showing <span className="font-medium">{tutors.length}</span> tutors
                   </div>
+                  <TabsList>
+                    <TabsTrigger value="grid">Grid</TabsTrigger>
+                    <TabsTrigger value="list">List</TabsTrigger>
+                  </TabsList>
                 </div>
                 
-                <TabsContent value="all" className="space-y-6">
-                  {tutors.map(tutor => (
-                    <Card key={tutor.id}>
-                      <CardContent className="p-6">
-                        <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
-                          <Avatar className="h-24 w-24">
-                            <AvatarImage src={tutor.avatar} />
-                            <AvatarFallback>{tutor.name.charAt(0)}</AvatarFallback>
-                          </Avatar>
-                          
-                          <div className="flex-grow space-y-3 text-center md:text-left">
-                            <div>
-                              <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                                <h3 className="text-xl font-medium">{tutor.name}</h3>
-                                <div className="flex items-center justify-center md:justify-end gap-1 mt-1 md:mt-0">
-                                  <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                                  <span className="font-medium">{tutor.rating}</span>
-                                  <span className="text-muted-foreground">({tutor.reviews})</span>
+                <TabsContent value="grid" className="mt-0">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {tutors.map((tutor) => (
+                      <Card key={tutor.id} className="overflow-hidden">
+                        <CardContent className="p-0">
+                          <div className="relative">
+                            <div className={cn(
+                              "w-3 h-3 rounded-full absolute top-3 right-3",
+                              tutor.isOnline ? "bg-green-500" : "bg-gray-300"
+                            )} />
+                            <div className="p-6 pb-4">
+                              <div className="flex items-start gap-4">
+                                <Avatar className="h-16 w-16 border-2 border-white">
+                                  <AvatarImage src={tutor.avatar} alt={tutor.name} />
+                                  <AvatarFallback>{tutor.name.charAt(0)}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                  <h3 className="font-semibold text-lg leading-tight mb-1">{tutor.name}</h3>
+                                  <p className="text-sm text-muted-foreground">{tutor.subject} Tutor</p>
+                                  <div className="flex items-center mt-1">
+                                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
+                                    <span className="text-sm font-medium">{tutor.rating}</span>
+                                    <span className="text-xs text-muted-foreground ml-1">({tutor.reviews} reviews)</span>
+                                  </div>
                                 </div>
                               </div>
-                              <p className="text-primary font-medium">{tutor.subject} Tutor</p>
-                              <p className="text-sm text-muted-foreground mt-1">{tutor.specialization}</p>
+                              
+                              <div className="mt-4">
+                                <div className="flex justify-between items-center mb-2">
+                                  <span className="text-sm font-medium">Specialization</span>
+                                  <span className="text-sm">{tutor.specialization}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                  <span className="text-sm font-medium">Hourly Rate</span>
+                                  <span className="text-sm font-bold">${tutor.hourlyRate}/hr</span>
+                                </div>
+                              </div>
+                              
+                              <div className="flex flex-wrap gap-1 mt-3">
+                                {tutor.badges.map((badge) => (
+                                  <Badge key={badge} variant="secondary" className="text-xs">
+                                    <Check className="h-3 w-3 mr-1" />
+                                    {badge}
+                                  </Badge>
+                                ))}
+                              </div>
                             </div>
                             
-                            <p className="text-sm">{tutor.bio}</p>
-                            
-                            <div className="flex flex-wrap gap-2">
-                              <Badge variant="outline" className="flex items-center">
-                                <Calendar className="mr-1 h-3 w-3" />
-                                {tutor.availability}
-                              </Badge>
-                              <Badge variant="outline" className="flex items-center">
-                                <Clock className="mr-1 h-3 w-3" />
-                                ${tutor.hourlyRate}/hour
-                              </Badge>
+                            <div className="border-t px-6 py-3 flex justify-between">
+                              <Button variant="ghost" size="sm" className="h-8 px-2">
+                                <MessageCircle className="h-4 w-4 mr-1" />
+                                Message
+                              </Button>
+                              <Button size="sm" className="h-8 px-3">
+                                <Video className="h-4 w-4 mr-1" />
+                                Book Session
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="list" className="mt-0 space-y-4">
+                  {tutors.map((tutor) => (
+                    <Card key={tutor.id}>
+                      <CardContent className="p-6">
+                        <div className="flex flex-col md:flex-row gap-6">
+                          <div className="flex items-start gap-4">
+                            <Avatar className="h-16 w-16 border-2 border-white">
+                              <AvatarImage src={tutor.avatar} alt={tutor.name} />
+                              <AvatarFallback>{tutor.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <h3 className="font-semibold text-lg">{tutor.name}</h3>
+                                {tutor.isOnline && <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Online</Badge>}
+                              </div>
+                              <p className="text-sm text-muted-foreground">{tutor.subject} Tutor</p>
+                              <div className="flex items-center mt-1">
+                                <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
+                                <span className="text-sm font-medium">{tutor.rating}</span>
+                                <span className="text-xs text-muted-foreground ml-1">({tutor.reviews} reviews)</span>
+                              </div>
+                              <div className="text-sm mt-1 font-medium">${tutor.hourlyRate}/hr</div>
                             </div>
                           </div>
                           
-                          <div className="flex sm:flex-col gap-2 w-full md:w-auto">
-                            <Button className="w-full sm:w-auto">
-                              <Calendar className="mr-2 h-4 w-4" />
-                              Schedule
-                            </Button>
-                            <Button variant="outline" className="w-full sm:w-auto">
-                              <MessageSquare className="mr-2 h-4 w-4" />
-                              Message
-                            </Button>
+                          <div className="flex-grow">
+                            <p className="text-sm mb-2">{tutor.bio}</p>
+                            <div className="text-xs text-muted-foreground mb-3">
+                              <span className="font-medium">Education:</span> {tutor.education}
+                            </div>
+                            
+                            <div className="flex flex-wrap gap-1">
+                              {tutor.badges.map((badge) => (
+                                <Badge key={badge} variant="secondary" className="text-xs">
+                                  <Check className="h-3 w-3 mr-1" />
+                                  {badge}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                          
+                          <div className="flex flex-col justify-between md:items-end gap-2">
+                            <div className="text-sm">
+                              <span className="font-medium block mb-1">Available:</span>
+                              <span className="text-muted-foreground">{tutor.availability}</span>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button variant="outline" size="sm">
+                                <MessageCircle className="h-4 w-4 mr-1" />
+                                Message
+                              </Button>
+                              <Button size="sm">
+                                <Video className="h-4 w-4 mr-1" />
+                                Book
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       </CardContent>
                     </Card>
                   ))}
                 </TabsContent>
-                
-                <TabsContent value="recommended">
-                  <Card>
-                    <CardContent className="p-6">
-                      <p>Personalized recommendations will appear here based on your learning profile and history.</p>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
-                
-                <TabsContent value="popular">
-                  <Card>
-                    <CardContent className="p-6">
-                      <p>The most popular tutors on our platform will be shown here.</p>
-                    </CardContent>
-                  </Card>
-                </TabsContent>
               </Tabs>
-            </div>
-
-            {/* Sidebar */}
-            <div className="space-y-6">
-              {/* Featured Subjects */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Featured Subjects</CardTitle>
-                  <CardDescription>Browse tutors by subject area</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-2">
-                    {subjects.map((subject, i) => (
-                      <Button key={i} variant="outline" className="justify-start h-auto py-3">
-                        <subject.icon className="mr-2 h-4 w-4" />
-                        <div className="text-left">
-                          <div className="font-medium">{subject.name}</div>
-                          <div className="text-xs text-muted-foreground">{subject.count} tutors</div>
-                        </div>
-                      </Button>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-              
-              {/* Quick Stats */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Platform Stats</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center">
-                      <Users className="h-4 w-4 mr-2 text-muted-foreground" />
-                      <span>Active Tutors</span>
-                    </div>
-                    <span className="font-medium">500+</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center">
-                      <BookOpen className="h-4 w-4 mr-2 text-muted-foreground" />
-                      <span>Subjects</span>
-                    </div>
-                    <span className="font-medium">50+</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center">
-                      <Star className="h-4 w-4 mr-2 text-muted-foreground" />
-                      <span>Avg. Rating</span>
-                    </div>
-                    <span className="font-medium">4.8/5</span>
-                  </div>
-                </CardContent>
-              </Card>
-              
-              {/* Need Help */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Need Help?</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm mb-4">Not sure which tutor to choose? Our team can help match you with the perfect tutor.</p>
-                  <Button className="w-full">Get Personalized Help</Button>
-                </CardContent>
-              </Card>
             </div>
           </div>
         </main>

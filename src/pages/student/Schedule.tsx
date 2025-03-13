@@ -1,9 +1,8 @@
 
 import { useState } from "react";
-import { useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import StudentSidebar from "@/components/StudentSidebar";
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Clock, Plus, X } from "lucide-react";
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Clock, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -102,6 +101,7 @@ const SchedulePage = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [date, setDate] = useState<Date>(new Date());
   const [view, setView] = useState<"day" | "week" | "month">("week");
+  const [selectedTab, setSelectedTab] = useState<string>("completed");
   
   // Mock data for upcoming sessions
   const sessions: TutorSession[] = [
@@ -206,11 +206,13 @@ const SchedulePage = () => {
                     <CardDescription>
                       {date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                     </CardDescription>
-                    <TabsList>
-                      <TabsTrigger value="day" onClick={() => setView("day")}>Day</TabsTrigger>
-                      <TabsTrigger value="week" onClick={() => setView("week")}>Week</TabsTrigger>
-                      <TabsTrigger value="month" onClick={() => setView("month")}>Month</TabsTrigger>
-                    </TabsList>
+                    <Tabs value={view} onValueChange={(value) => setView(value as "day" | "week" | "month")}>
+                      <TabsList>
+                        <TabsTrigger value="day">Day</TabsTrigger>
+                        <TabsTrigger value="week">Week</TabsTrigger>
+                        <TabsTrigger value="month">Month</TabsTrigger>
+                      </TabsList>
+                    </Tabs>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -267,10 +269,10 @@ const SchedulePage = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Tabs defaultValue="completed">
+                  <Tabs defaultValue="completed" value={selectedTab} onValueChange={setSelectedTab}>
                     <TabsList className="w-full mb-4">
-                      <TabsTrigger value="completed" className="flex-1">Completed</TabsTrigger>
-                      <TabsTrigger value="cancelled" className="flex-1">Cancelled</TabsTrigger>
+                      <TabsTrigger value="completed">Completed</TabsTrigger>
+                      <TabsTrigger value="cancelled">Cancelled</TabsTrigger>
                     </TabsList>
                     <TabsContent value="completed">
                       {completedSessions.length > 0 ? (
