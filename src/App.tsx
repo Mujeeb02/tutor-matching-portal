@@ -26,6 +26,13 @@ import Analytics from "./pages/tutor/Analytics";
 // Import student dashboard pages
 import FindTutors from "./pages/student/FindTutors";
 import MyTutors from "./pages/student/MyTutors";
+import StudentSchedule from "./pages/student/Schedule";
+import StudentMessages from "./pages/student/Messages";
+import StudentMaterials from "./pages/student/Materials";
+import StudentPayments from "./pages/student/Payments";
+import StudentAnalytics from "./pages/student/Analytics";
+import StudentSettings from "./pages/student/Settings";
+import StudentHelp from "./pages/student/Help";
 
 const queryClient = new QueryClient();
 
@@ -46,15 +53,15 @@ const App = () => (
           
           {/* Student Dashboard Routes */}
           <Route path="/student-dashboard" element={<StudentDashboard />} />
-          <Route path="/student-dashboard/find-tutors" element={<StudentDashboard />} />
-          <Route path="/student-dashboard/my-tutors" element={<StudentDashboard />} />
-          <Route path="/student-dashboard/schedule" element={<StudentDashboard />} />
-          <Route path="/student-dashboard/messages" element={<StudentDashboard />} />
-          <Route path="/student-dashboard/materials" element={<StudentDashboard />} />
-          <Route path="/student-dashboard/payments" element={<StudentDashboard />} />
-          <Route path="/student-dashboard/analytics" element={<StudentDashboard />} />
-          <Route path="/student-dashboard/settings" element={<StudentDashboard />} />
-          <Route path="/student-dashboard/help" element={<StudentDashboard />} />
+          <Route path="/student-dashboard/find-tutors" element={<FindTutors />} />
+          <Route path="/student-dashboard/my-tutors" element={<MyTutors />} />
+          <Route path="/student-dashboard/schedule" element={<StudentSchedule />} />
+          <Route path="/student-dashboard/messages" element={<StudentMessages />} />
+          <Route path="/student-dashboard/materials" element={<StudentMaterials />} />
+          <Route path="/student-dashboard/payments" element={<StudentPayments />} />
+          <Route path="/student-dashboard/analytics" element={<StudentAnalytics />} />
+          <Route path="/student-dashboard/settings" element={<StudentSettings />} />
+          <Route path="/student-dashboard/help" element={<StudentHelp />} />
           
           {/* Tutor Dashboard Routes */}
           <Route path="/tutor-dashboard" element={<TutorDashboard />} />
