@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
@@ -158,7 +157,7 @@ const MessagesPage = () => {
       <div 
         className={cn(
           "flex-1 transition-all duration-300",
-          isSidebarOpen ? "ml-64" : "ml-20"
+          isSidebarOpen ? "ml-64" : "ml-0"
         )}
       >
         <main className="py-8 px-6 h-[calc(100vh-4rem)] max-w-7xl mx-auto w-full">

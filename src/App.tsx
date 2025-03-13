@@ -33,6 +33,8 @@ import StudentPayments from "./pages/student/Payments";
 import StudentAnalytics from "./pages/student/Analytics";
 import StudentSettings from "./pages/student/Settings";
 import StudentHelp from "./pages/student/Help";
+import SettingsPage from "./pages/tutor/Settings";
+import HelpPage from "./pages/tutor/Help";
 
 const queryClient = new QueryClient();
 
@@ -71,8 +73,8 @@ const App = () => (
           <Route path="/tutor-dashboard/materials" element={<Materials />} />
           <Route path="/tutor-dashboard/earnings" element={<Earnings />} />
           <Route path="/tutor-dashboard/analytics" element={<Analytics />} />
-          <Route path="/tutor-dashboard/settings" element={<TutorDashboard />} />
-          <Route path="/tutor-dashboard/help" element={<TutorDashboard />} />
+          <Route path="/tutor-dashboard/settings" element={<SettingsPage />} />
+          <Route path="/tutor-dashboard/help" element={<HelpPage />} />
           
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

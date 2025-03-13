@@ -130,7 +130,7 @@ const FindTutorsPage = () => {
             <p className="text-muted-foreground">Discover expert tutors for any subject or topic</p>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div className="flex flex-col gap-6">
             {/* Search and Filters */}
             <div className="lg:col-span-1">
               <Card>
